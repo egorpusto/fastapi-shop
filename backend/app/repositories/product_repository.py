@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
-from ..models import Product
+from ..models.product import Product
 from ..schemas.product import ProductCreate
 
 
@@ -34,7 +34,7 @@ class ProductRepository:
         self.db.refresh(db_product)
         return db_product
 
-    def multiple_by_ids(self, product_ids: List[int]) -> List[Product]:
+    def get_multiple_by_ids(self, product_ids: List[int]) -> List[Product]:
         return (
             self.db.query(Product)
             .options(joinedload(Product.category))

@@ -1,4 +1,4 @@
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 from .category import CategoryResponse
@@ -7,9 +7,9 @@ from .category import CategoryResponse
 class ProductBase(BaseModel):
     name: str = Field(..., min_length=5, max_length=200, description="Product name")
     description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., gt=0, description="Product price(must be greater than 0)")
-    category_id: int = Field(..., description="Category id")
-    image_url: Optional[str] = Field(None, description="Product image url")
+    price: float = Field(..., gt=0, description="Product price(must be greater than 0")
+    category_id: int = Field(..., description="Category ID")
+    image_url: Optional[str] = Field(None, description="Product image URL")
 
 
 class ProductCreate(ProductBase):
@@ -17,7 +17,7 @@ class ProductCreate(ProductBase):
 
 
 class ProductResponse(BaseModel):
-    id: int = Field(..., description="unique product ID")
+    id: int = Field(..., description="Unique product ID")
     name: str
     description: Optional[str]
     price: float
@@ -27,9 +27,9 @@ class ProductResponse(BaseModel):
     category: CategoryResponse = Field(..., description="Product category details")
 
     class Config:
-        form_attributes = True
+        from_attributes = True
 
 
 class ProductListResponse(BaseModel):
-    products: List[ProductResponse]
+    products: list[ProductResponse]
     total: int = Field(..., description="Total number of products")
