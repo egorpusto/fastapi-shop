@@ -170,3 +170,6 @@ staticfiles/
 # PostgreSQL dumps
 *.sql
 *.dump
+
+# FastAPI Shop specific ignores
+shop.db
