@@ -1,19 +1,46 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
 from .config import settings
 
-engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Create async engine
+engine = create_async_engine(
+    settings.database_url,
+    echo=settings.debug,
+    pool_pre_ping=True,  # Verify connections before using them
+    pool_size=10,  # Connection pool size
+    max_overflow=20,  # Max connections beyond pool_size
+)
+
+# Create async session factory
+async_session_maker = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
+)
+
+
 Base = declarative_base()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-def init_db():
-    Base.metadata.create_all(bind=engine)
+async def get_db() -> AsyncSession:
+    """
+    Dependency that provides async database session.
+    Automatically closes session after request.
+    """
+    async with async_session_maker() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
+async def init_db():
+    """
+    Initialize database tables.
+    Creates all tables defined in models.
+    """
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
