@@ -112,6 +112,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.env.local
+.env.*.local
 
 # Spyder project settings
 .spyderproject
@@ -143,6 +145,11 @@ cython_debug/
 # Visual Studio Code
 .vscode/
 .idea/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # Ruff stuff:
 .ruff_cache/
@@ -171,5 +178,21 @@ staticfiles/
 *.sql
 *.dump
 
-# FastAPI Shop specific ignores
-shop.db
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Alembic
+alembic/versions/*.py
+!alembic/versions/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Redis
+dump.rdb
