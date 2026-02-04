@@ -1,35 +1,50 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
+from decimal import Decimal
 
 
 class CartItemBase(BaseModel):
-    product_id: int = Field(..., description="Product ID")
-    quantity: int = Field(..., gt=0, description="Quantity (must be greater than 0)")
+    """Base cart item schema"""
+
+    product_id: int = Field(..., gt=0, description="Product ID")
+    quantity: int = Field(..., gt=0, le=100, description="Quantity (max 100)")
 
 
 class CartItemCreate(CartItemBase):
+    """Schema for adding item to cart"""
+
     pass
 
 
 class CartItemUpdate(BaseModel):
-    product_id: int = Field(..., description="Product ID")
-    quantity: int = Field(
-        ..., gt=0, description="New quantity (must be greater than 0)"
-    )
+    """Schema for updating cart item quantity"""
+
+    quantity: int = Field(..., gt=0, le=100, description="New quantity")
 
 
-class CartItem(BaseModel):
+class CartItemResponse(BaseModel):
+    """Schema for cart item in response"""
+
     product_id: int
-    name: str = Field(..., description="Product name")
-    price: float = Field(..., description="Product price")
-    quantity: int = Field(..., description="Quantity in cart")
-    subtotal: float = Field(
-        ..., description="Total price for this item (price * quantity)"
-    )
-    image_url: Optional[str] = Field(None, description="Product image URL")
+    product_name: str
+    product_price: Decimal
+    product_image_url: Optional[str] = None
+    quantity: int
+    subtotal: Decimal = Field(..., description="Price * Quantity")
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CartResponse(BaseModel):
-    items: list[CartItem] = Field(..., description="List of items in cart")
-    total: float = Field(..., description="Total cart price")
-    items_count: int = Field(..., description="Total number of items in cart")
+    """Schema for full cart response"""
+
+    items: List[CartItemResponse]
+    total_items: int = Field(..., description="Total number of items in cart")
+    total_price: Decimal = Field(..., description="Total cart price")
+
+    model_config = ConfigDict(from_attributes=True)
+
+class CartClearResponse(BaseModel):
+    """Schema for cart clear response"""
+    message: str
+    items_removed: int

@@ -13,13 +13,56 @@ services:
     environment:
       - APP_NAME=${APP_NAME:-FastAPI Shop}
       - DEBUG=${DEBUG:-False}
-      - DATABASE_URL=sqlite:///./shop.db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-fashop-user}:${POSTGRES_PASSWORD:-fashop-password}@postgres:5432/${POSTGRES_DB:-fashop-db}
+      - REDIS_URL=redis://default:${REDIS_PASSWORD:-fashop_redis_pass}@redis:6379/0
       - CORS_ORIGINS=https://${DOMAIN},https://www.${DOMAIN}
+    depends_on:
+      postgres:
+        condition: servic_healthy
+      redis:
+        condition: servic_healthy
+
     expose:
       - "8000"
     restart: unless-stopped
     networks:
       - fashop_network
+  postgres:
+    image: postgres:16-alpine
+    container_name: fashop_postgres
+    environment:
+      - POSTGRES_USER: ${POSTGRES_USER:-fashop-user}
+      - POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fashop-password}
+      - POSTGRES_DB: ${POSTGRES_DB:-fashop-db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - fashop_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fashop-user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  redis:
+    image: redis:7-alpine
+    container_name: fashop_redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-fashop_redis_pass}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - fashop_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
@@ -74,3 +117,5 @@ networks:
 
 volumes:
   backend_static:
+  postgres_data:
+  redis_data:
