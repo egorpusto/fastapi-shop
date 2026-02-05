@@ -20,9 +20,7 @@ class Product(Base):
     name = Column(String(255), nullable=False, index=True)
     description = Column(Text)
     price = Column(Numeric(10, 2), nullable=False)  # Better for money than Float
-    category_id = Column(
-        Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False
-    )
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False)
     image_url = Column(String(500))
     stock_quantity = Column(Integer, default=0)  # Track inventory
     is_active = Column(Integer, default=1)  # Soft delete support

@@ -15,9 +15,7 @@ from ..schemas.cart import (
 router = APIRouter(prefix="/api/cart", tags=["cart"])
 
 
-def get_session_id(
-    session_id: Optional[str] = Cookie(None, alias="cart_session_id")
-) -> str:
+def get_session_id(session_id: Optional[str] = Cookie(None, alias="cart_session_id")) -> str:
     """
     Get or create session ID from cookie.
     Used to identify user's cart in Redis.
@@ -81,9 +79,7 @@ async def add_to_cart(
     return await service.add_item(session_id, item_data)
 
 
-@router.patch(
-    "/{product_id}", response_model=CartResponse, status_code=status.HTTP_200_OK
-)
+@router.patch("/{product_id}", response_model=CartResponse, status_code=status.HTTP_200_OK)
 async def update_cart_item(
     product_id: int,
     item_data: CartItemUpdate,
@@ -100,9 +96,7 @@ async def update_cart_item(
     return await service.update_item(session_id, product_id, item_data)
 
 
-@router.delete(
-    "/{product_id}", response_model=CartResponse, status_code=status.HTTP_200_OK
-)
+@router.delete("/{product_id}", response_model=CartResponse, status_code=status.HTTP_200_OK)
 async def remove_from_cart(
     product_id: int,
     session_id: str = Depends(get_session_id),
@@ -119,9 +113,7 @@ async def remove_from_cart(
 
 
 @router.delete("", response_model=CartClearResponse, status_code=status.HTTP_200_OK)
-async def clear_cart(
-    session_id: str = Depends(get_session_id), db: AsyncSession = Depends(get_db)
-):
+async def clear_cart(session_id: str = Depends(get_session_id), db: AsyncSession = Depends(get_db)):
     """
     Clear all items from cart.
 

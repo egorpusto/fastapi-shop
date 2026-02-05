@@ -28,9 +28,7 @@ class CategoryService:
         Get all categories with caching.
         Optionally includes product count for each category.
         """
-        cache_key = (
-            f"categories:all:inactive:{include_inactive}:count:{with_product_count}"
-        )
+        cache_key = f"categories:all:inactive:{include_inactive}:count:{with_product_count}"
 
         # Try cache
         cached_data = await cache.get(cache_key)
@@ -40,9 +38,7 @@ class CategoryService:
 
         # Get from database
         if with_product_count:
-            categories_data = await self.repository.get_with_product_count(
-                include_inactive
-            )
+            categories_data = await self.repository.get_with_product_count(include_inactive)
             categories = [CategoryResponse(**cat) for cat in categories_data]
         else:
             categories_db = await self.repository.get_all(include_inactive)
@@ -132,19 +128,13 @@ class CategoryService:
                 detail=f"Failed to create category: {str(e)}",
             )
 
-    async def update_category(
-        self, category_id: int, category_data: CategoryUpdate
-    ) -> CategoryResponse:
+    async def update_category(self, category_id: int, category_data: CategoryUpdate) -> CategoryResponse:
         """Update category and invalidate cache"""
         # Filter out None values
-        update_data = {
-            k: v for k, v in category_data.model_dump().items() if v is not None
-        }
+        update_data = {k: v for k, v in category_data.model_dump().items() if v is not None}
 
         if not update_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
 
         # If updating slug, check uniqueness
         if "slug" in update_data:

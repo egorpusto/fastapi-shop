@@ -23,9 +23,7 @@ async def get_products(
     category_id: Optional[int] = Query(None, description="Filter by category ID"),
     min_price: Optional[Decimal] = Query(None, ge=0, description="Minimum price"),
     max_price: Optional[Decimal] = Query(None, ge=0, description="Maximum price"),
-    search: Optional[str] = Query(
-        None, max_length=100, description="Search in name/description"
-    ),
+    search: Optional[str] = Query(None, max_length=100, description="Search in name/description"),
     in_stock: Optional[bool] = Query(None, description="Show only in-stock products"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -51,14 +49,10 @@ async def get_products(
         in_stock=in_stock,
     )
 
-    return await service.get_all_products(
-        page=page, page_size=page_size, filters=filters
-    )
+    return await service.get_all_products(page=page, page_size=page_size, filters=filters)
 
 
-@router.get(
-    "/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK
-)
+@router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     """
     Get single product by ID.
@@ -84,15 +78,11 @@ async def get_products_by_category(
     Get all products in a specific category with pagination.
     """
     service = ProductService(db)
-    return await service.get_products_by_category(
-        category_id=category_id, page=page, page_size=page_size
-    )
+    return await service.get_products_by_category(category_id=category_id, page=page, page_size=page_size)
 
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-async def create_product(
-    product_data: ProductCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_product(product_data: ProductCreate, db: AsyncSession = Depends(get_db)):
     """
     Create a new product.
 
@@ -105,12 +95,8 @@ async def create_product(
     return await service.create_product(product_data)
 
 
-@router.patch(
-    "/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK
-)
-async def update_product(
-    product_id: int, product_data: ProductUpdate, db: AsyncSession = Depends(get_db)
-):
+@router.patch("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
+async def update_product(product_id: int, product_data: ProductUpdate, db: AsyncSession = Depends(get_db)):
     """
     Update existing product.
 

@@ -8,9 +8,7 @@ class CategoryBase(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100, description="Category name")
     description: Optional[str] = Field(None, description="Category description")
-    slug: str = Field(
-        ..., min_length=1, max_length=100, description="URL-friendly slug"
-    )
+    slug: str = Field(..., min_length=1, max_length=100, description="URL-friendly slug")
 
 
 class CategoryCreate(CategoryBase):
@@ -35,9 +33,7 @@ class CategoryResponse(CategoryBase):
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
-    product_count: Optional[int] = Field(
-        None, description="Number of products in category"
-    )
+    product_count: Optional[int] = Field(None, description="Number of products in category")
 
     model_config = ConfigDict(from_attributes=True)
 

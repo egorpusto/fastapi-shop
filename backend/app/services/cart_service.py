@@ -84,13 +84,9 @@ class CartService:
 
         logger.info("cart_retrieved", session_id=session_id, items=len(items))
 
-        return CartResponse(
-            items=items, total_items=total_items, total_price=total_price
-        )
+        return CartResponse(items=items, total_items=total_items, total_price=total_price)
 
-    async def add_item(
-        self, session_id: str, item_data: CartItemCreate
-    ) -> CartResponse:
+    async def add_item(self, session_id: str, item_data: CartItemCreate) -> CartResponse:
         """
         Add item to cart or update quantity if already exists.
         Validates product existence and stock availability.
@@ -104,9 +100,7 @@ class CartService:
             )
 
         # Check stock availability
-        if not await self.product_repo.check_stock(
-            item_data.product_id, item_data.quantity
-        ):
+        if not await self.product_repo.check_stock(item_data.product_id, item_data.quantity):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Insufficient stock for product {item_data.product_id}",
@@ -122,9 +116,7 @@ class CartService:
             new_quantity = cart_data[product_key] + item_data.quantity
 
             # Check stock for new quantity
-            if not await self.product_repo.check_stock(
-                item_data.product_id, new_quantity
-            ):
+            if not await self.product_repo.check_stock(item_data.product_id, new_quantity):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Insufficient stock. Available: {product.stock_quantity}",
@@ -150,9 +142,7 @@ class CartService:
         # Return updated cart
         return await self.get_cart(session_id)
 
-    async def update_item(
-        self, session_id: str, product_id: int, item_data: CartItemUpdate
-    ) -> CartResponse:
+    async def update_item(self, session_id: str, product_id: int, item_data: CartItemUpdate) -> CartResponse:
         """
         Update item quantity in cart.
         Set quantity to remove item.
@@ -214,6 +204,4 @@ class CartService:
 
         logger.info("cart_cleared", session_id=session_id, items_removed=items_count)
 
-        return CartClearResponse(
-            message="Cart cleared successfully", items_removed=items_count
-        )
+        return CartClearResponse(message="Cart cleared successfully", items_removed=items_count)

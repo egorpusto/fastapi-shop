@@ -11,9 +11,7 @@ class ProductBase(BaseModel):
     description: Optional[str] = Field(None, description="Product description")
     price: Decimal = Field(..., gt=0, decimal_places=2, description="Product price")
     category_id: int = Field(..., gt=0, description="Category ID")
-    image_url: Optional[str] = Field(
-        None, max_length=500, description="Product image URL"
-    )
+    image_url: Optional[str] = Field(None, max_length=500, description="Product image URL")
     stock_quantity: int = Field(default=0, ge=0, description="Available stock quantity")
 
 
@@ -64,8 +62,6 @@ class ProductFilter(BaseModel):
     category_id: Optional[int] = None
     min_price: Optional[Decimal] = Field(None, ge=0)
     max_price: Optional[Decimal] = Field(None, ge=0)
-    search: Optional[str] = Field(
-        None, max_length=100, description="Search in name and description"
-    )
+    search: Optional[str] = Field(None, max_length=100, description="Search in name and description")
     is_active: bool = True
     in_stock: Optional[bool] = None  # Filter only products with stock > 0

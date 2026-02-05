@@ -55,9 +55,7 @@ class ProductService:
         skip = (page - 1) * page_size
 
         # Get from database
-        products, total = await self.repository.get_all(
-            skip=skip, limit=page_size, filters=filters
-        )
+        products, total = await self.repository.get_all(skip=skip, limit=page_size, filters=filters)
 
         # Calculate total pages
         pages = (total + page_size - 1) // page_size
@@ -104,14 +102,10 @@ class ProductService:
 
         return response
 
-    async def get_products_by_category(
-        self, category_id: int, page: int = 1, page_size: int = 20
-    ) -> ProductListResponse:
+    async def get_products_by_category(self, category_id: int, page: int = 1, page_size: int = 20) -> ProductListResponse:
         """Get products by category with pagination"""
         filters = ProductFilter(category_id=category_id, is_active=True)
-        return await self.get_all_products(
-            page=page, page_size=page_size, filters=filters
-        )
+        return await self.get_all_products(page=page, page_size=page_size, filters=filters)
 
     async def create_product(self, product_data: ProductCreate) -> ProductResponse:
         """Create new product and invalidate cache"""
@@ -131,19 +125,13 @@ class ProductService:
                 detail=f"Failed to create product: {str(e)}",
             )
 
-    async def update_product(
-        self, product_id: int, product_data: ProductUpdate
-    ) -> ProductResponse:
+    async def update_product(self, product_id: int, product_data: ProductUpdate) -> ProductResponse:
         """Update product and invalidate cache"""
         # Filter out None values
-        update_data = {
-            k: v for k, v in product_data.model_dump().items() if v is not None
-        }
+        update_data = {k: v for k, v in product_data.model_dump().items() if v is not None}
 
         if not update_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
 
         product = await self.repository.update(product_id, update_data)
         if not product:

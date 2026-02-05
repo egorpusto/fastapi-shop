@@ -26,9 +26,7 @@ class CategoryRepository:
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def get_with_product_count(
-        self, include_inactive: bool = False
-    ) -> List[dict]:
+    async def get_with_product_count(self, include_inactive: bool = False) -> List[dict]:
         """
         Get all categories with product count.
         Returns list of dicts with category data and product_count.
@@ -100,9 +98,7 @@ class CategoryRepository:
 
     async def exists(self, category_id: int) -> bool:
         """Check if category exists and is active"""
-        query = select(func.count()).where(
-            Category.id == category_id, Category.is_active == 1
-        )
+        query = select(func.count()).where(Category.id == category_id, Category.is_active == 1)
         result = await self.db.execute(query)
         count = result.scalar()
         return count > 0

@@ -44,9 +44,7 @@ class ProductRepository:
                 )
 
             if filters.is_active is not None:
-                query = query.where(
-                    Product.is_active == (1 if filters.is_active else 0)
-                )
+                query = query.where(Product.is_active == (1 if filters.is_active else 0))
 
             if filters.in_stock:
                 query = query.where(Product.stock_quantity > 0)
@@ -70,17 +68,11 @@ class ProductRepository:
 
     async def get_by_id(self, product_id: int) -> Optional[Product]:
         """Get product by ID with category relationship"""
-        query = (
-            select(Product)
-            .options(joinedload(Product.category))
-            .where(Product.id == product_id)
-        )
+        query = select(Product).options(joinedload(Product.category)).where(Product.id == product_id)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_by_category(
-        self, category_id: int, skip: int = 0, limit: int = 20
-    ) -> tuple[List[Product], int]:
+    async def get_by_category(self, category_id: int, skip: int = 0, limit: int = 20) -> tuple[List[Product], int]:
         """Get products by category with pagination"""
         filters = ProductFilter(category_id=category_id, is_active=True)
         return await self.get_all(skip=skip, limit=limit, filters=filters)

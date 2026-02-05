@@ -9,9 +9,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # Database settings
-    database_url: str = (
-        "postgresql+asyncpg://fashop_user:fashop_password@localhost:5432/fashop_db"
-    )
+    database_url: str = "postgresql+asyncpg://fashop_user:fashop_password@localhost:5432/fashop_db"
 
     # Redis settings
     redis_url: str = "redis://default:fashop_redis_pass@localhost:6379/0"

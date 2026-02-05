@@ -26,14 +26,10 @@ async def get_categories(
     - **with_product_count**: Include number of products in each category (default: True)
     """
     service = CategoryService(db)
-    return await service.get_all_categories(
-        include_inactive=include_inactive, with_product_count=with_product_count
-    )
+    return await service.get_all_categories(include_inactive=include_inactive, with_product_count=with_product_count)
 
 
-@router.get(
-    "/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK
-)
+@router.get("/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
 async def get_category(category_id: int, db: AsyncSession = Depends(get_db)):
     """
     Get single category by ID.
@@ -44,9 +40,7 @@ async def get_category(category_id: int, db: AsyncSession = Depends(get_db)):
     return await service.get_category_by_id(category_id)
 
 
-@router.get(
-    "/slug/{slug}", response_model=CategoryResponse, status_code=status.HTTP_200_OK
-)
+@router.get("/slug/{slug}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
 async def get_category_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
     """
     Get category by slug (SEO-friendly URL).
@@ -59,9 +53,7 @@ async def get_category_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
-async def create_category(
-    category_data: CategoryCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_category(category_data: CategoryCreate, db: AsyncSession = Depends(get_db)):
     """
     Create a new category.
 
@@ -75,12 +67,8 @@ async def create_category(
     return await service.create_category(category_data)
 
 
-@router.patch(
-    "/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK
-)
-async def update_category(
-    category_id: int, category_data: CategoryUpdate, db: AsyncSession = Depends(get_db)
-):
+@router.patch("/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
+async def update_category(category_id: int, category_data: CategoryUpdate, db: AsyncSession = Depends(get_db)):
     """
     Update existing category.
 

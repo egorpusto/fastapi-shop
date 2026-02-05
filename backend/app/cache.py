@@ -16,9 +16,7 @@ class RedisCache:
     async def connect(self):
         """Connect to Redis server"""
         if not self.redis_client:
-            self.redis_client = await redis.from_url(
-                settings.redis_url, encoding="utf-8", decode_response=True
-            )
+            self.redis_client = await redis.from_url(settings.redis_url, encoding="utf-8", decode_response=True)
 
     async def disconnect(self):
         """Disconnect from Redis server"""
