@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional
+from typing import List, Optional
 from decimal import Decimal
 
 
@@ -44,7 +44,9 @@ class CartResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class CartClearResponse(BaseModel):
     """Schema for cart clear response"""
+
     message: str
     items_removed: int
