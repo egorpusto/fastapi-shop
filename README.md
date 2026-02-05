@@ -7,8 +7,10 @@ A production-ready e-commerce REST API built with FastAPI, PostgreSQL, Redis, an
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)
 ![Redis](https://img.shields.io/badge/Redis-7-red.svg)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)
+![CI](https://github.com/egorpusto/fastapi-shop/workflows/CI/badge.svg)
 ![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)
 ![Coverage](https://img.shields.io/badge/Coverage-70%25+-brightgreen.svg)
+![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 ## 🎯 Project Overview
 
@@ -99,6 +101,61 @@ This project demonstrates a full-stack e-commerce application with a focus on ba
 - ✅ Static file serving
 - ✅ Comprehensive error handling
 - ✅ Request/response logging
+
+## 🔄 CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment.
+
+### Automated Checks
+
+Every push and pull request triggers:
+
+✅ **Code Quality**
+- Linting with flake8
+- Code formatting check with black
+- Import sorting with isort
+
+✅ **Testing**
+- Full test suite with pytest
+- PostgreSQL and Redis services
+- Coverage report (minimum 70%)
+
+✅ **Security**
+- Dependency vulnerability scanning with pip-audit
+- Safety checks for known security issues
+
+✅ **Docker**
+- Backend image build validation
+- Frontend image build validation
+- docker-compose configuration test
+
+### Workflow Status
+
+![CI Workflow](https://github.com/egorpusto/fastapi-shop/workflows/CI/badge.svg)
+
+All checks must pass before merging to main branch.
+
+### Running Checks Locally
+```bash
+# Install dev dependencies
+cd backend
+pip install flake8 black isort pip-audit safety
+
+# Run linting
+flake8 app
+
+# Check formatting
+black --check app
+
+# Check imports
+isort --check-only app
+
+# Run tests
+pytest
+
+# Security scan
+pip-audit
+```
 
 ## 🚀 Getting Started
 
