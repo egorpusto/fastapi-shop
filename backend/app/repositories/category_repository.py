@@ -1,7 +1,9 @@
-from typing import Optional, List
-from sqlalchemy import select, func
+from typing import List, Optional
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
 from ..models.category import Category
 
 

@@ -1,18 +1,19 @@
-from typing import List, Dict
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
-import structlog
 from decimal import Decimal
+from typing import Dict, List
 
+import structlog
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from ..cache import cache
 from ..repositories.product_repository import ProductRepository
 from ..schemas.cart import (
-    CartResponse,
-    CartItemResponse,
-    CartItemCreate,
-    CartItemUpdate,
     CartClearResponse,
+    CartItemCreate,
+    CartItemResponse,
+    CartItemUpdate,
+    CartResponse,
 )
-from ..cache import cache
 
 logger = structlog.get_logger()
 

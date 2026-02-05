@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, status, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
 from decimal import Decimal
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
-from ..services.product_service import ProductService
 from ..schemas.product import (
-    ProductResponse,
-    ProductListResponse,
     ProductCreate,
-    ProductUpdate,
     ProductFilter,
+    ProductListResponse,
+    ProductResponse,
+    ProductUpdate,
 )
+from ..services.product_service import ProductService
 
 router = APIRouter(prefix="/api/products", tags=["products"])
 

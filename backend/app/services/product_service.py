@@ -1,17 +1,18 @@
 from typing import Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
-import structlog
 
+import structlog
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from ..cache import cache
 from ..repositories.product_repository import ProductRepository
 from ..schemas.product import (
-    ProductResponse,
-    ProductListResponse,
     ProductCreate,
-    ProductUpdate,
     ProductFilter,
+    ProductListResponse,
+    ProductResponse,
+    ProductUpdate,
 )
-from ..cache import cache
 
 logger = structlog.get_logger()
 

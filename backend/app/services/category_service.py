@@ -1,15 +1,15 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
 import structlog
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..cache import cache
 from ..repositories.category_repository import CategoryRepository
 from ..schemas.category import (
-    CategoryResponse,
-    CategoryListResponse,
     CategoryCreate,
+    CategoryListResponse,
+    CategoryResponse,
     CategoryUpdate,
 )
-from ..cache import cache
 
 logger = structlog.get_logger()
 

@@ -1,15 +1,17 @@
+from datetime import datetime
+
 from sqlalchemy import (
     Column,
-    Integer,
-    String,
-    Text,
-    Numeric,
     DateTime,
     ForeignKey,
     Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
 )
 from sqlalchemy.orm import relationship
-from datetime import datetime
+
 from ..database import Base
 
 

@@ -1,10 +1,12 @@
-from typing import Optional, List
-from sqlalchemy import select, func, or_
+from decimal import Decimal
+from typing import List, Optional
+
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+
 from ..models.product import Product
 from ..schemas.product import ProductFilter
-from decimal import Decimal
 
 
 class ProductRepository:
