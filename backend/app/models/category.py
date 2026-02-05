@@ -10,15 +10,13 @@ class Category(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, nullable=False, index=True)
     description = Column(Text)
-    slug = Column(String(100), unique=True, nullable=False, index=True)
-    is_active = Column(Index, default=1)
+    slug = Column(String(100), unique=True, index=True)  # URL-friendly name
+    is_active = Column(Integer, default=1)  # ← ИСПРАВЛЕНО: было Index, стало Integer
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    products = relationship(
-        "Product", back_populates="category", cascade="all, delete-orphan"
-    )
+    products = relationship("Product", back_populates="category", cascade="all, delete-orphan")
 
     __table_args__ = (Index("idx_category_active", "is_active"),)
 
