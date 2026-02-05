@@ -3,8 +3,8 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: fashop_backend
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     volumes:
@@ -13,20 +13,25 @@ services:
     environment:
       - APP_NAME=${APP_NAME:-FastAPI Shop}
       - DEBUG=${DEBUG:-False}
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-fashop-user}:${POSTGRES_PASSWORD:-fashop-password}@postgres:5432/${POSTGRES_DB:-fashop-db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-fashop_user}:${POSTGRES_PASSWORD:-fashop_password}@postgres:5432/${POSTGRES_DB:-fashop_db}
       - REDIS_URL=redis://default:${REDIS_PASSWORD:-fashop_redis_pass}@redis:6379/0
       - CORS_ORIGINS=https://${DOMAIN},https://www.${DOMAIN}
-    depends_on:
-      postgres:
-        condition: servic_healthy
-      redis:
-        condition: servic_healthy
-
     expose:
       - "8000"
     restart: unless-stopped
     networks:
       - fashop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   postgres:
     image: postgres:16-alpine
     container_name: fashop_postgres
@@ -42,11 +47,11 @@ services:
     networks:
       - fashop_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fashop-user}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fashop-user}" ]
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
   redis:
     image: redis:7-alpine
     container_name: fashop_redis
@@ -59,7 +64,7 @@ services:
     networks:
       - fashop_network
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,12 +77,19 @@ services:
         - VITE_API_BASE_URL=https://${DOMAIN}/api
     container_name: fashop_frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     expose:
       - "80"
     restart: unless-stopped
     networks:
       - fashop_network
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
   nginx:
     image: nginx:alpine

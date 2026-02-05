@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+shop.db
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+
+# Alembic (migrations generated on server)
+alembic/versions/*.py
+!alembic/versions/.gitkeep
+
+# Tests
+tests/
+pytest.ini
+
+# Development files
+run.py
+seed_data.py
