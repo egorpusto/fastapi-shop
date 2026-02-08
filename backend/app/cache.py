@@ -1,9 +1,22 @@
 import json
+from datetime import datetime
+from decimal import Decimal
 from typing import Any, Optional
 
 import redis.asyncio as redis
 
 from .config import settings
+
+
+class CustomJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder for Decimal and datetime types"""
+
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return str(obj)
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 class RedisCache:
@@ -53,7 +66,7 @@ class RedisCache:
 
         # Serialize value to JSON if it's not a string
         if not isinstance(value, str):
-            value = json.dumps(value)
+            value = json.dumps(value, cls=CustomJSONEncoder)
 
         return await self.redis_client.setex(key, ttl, value)
 
@@ -79,4 +92,4 @@ class RedisCache:
 
 
 # Global cache instance
-cache = RedisCache()
+cache = RedisCac
