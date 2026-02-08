@@ -18,11 +18,14 @@ class RedisCache:
     async def connect(self):
         """Connect to Redis server"""
         if not self.redis_client:
-            self.redis_client = await redis.from_url(settings.redis_url, encoding="utf-8", decode_response=True)
+            self.redis_client = await redis.from_url(
+                settings.redis_url, encoding="utf-8", decode_responses=True
+            )
 
     async def disconnect(self):
         """Disconnect from Redis server"""
-        await self.redis_client.close()
+        if self.redis_client:
+            await self.redis_client.close()
 
     async def get(self, key: str) -> Optional[Any]:
         """
@@ -43,7 +46,7 @@ class RedisCache:
     async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
         """
         Set value in cache with optional TTL (time to live).
-        TTL in seconds, defaults to settings.cache_ttl
+        TTL in seconds, defaults to settings.cache_ttl.
         """
         if not self.redis_client:
             await self.connect()
@@ -51,12 +54,12 @@ class RedisCache:
         ttl = ttl or settings.cache_ttl
 
         # Serialize value to JSON if it's not a string
-        if not isinstance(value):
+        if not isinstance(value, str):
             value = json.dumps(value)
 
         return await self.redis_client.setex(key, ttl, value)
 
-    async def delete(self, key: str):
+    async def delete(self, key: str) -> bool:
         """Delete key from cache"""
         if not self.redis_client:
             await self.connect()
