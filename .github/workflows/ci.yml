@@ -172,6 +172,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
+      - name: Create test .env file
+        run: |
+          cat > .env << EOF
+          DOMAIN=test.example.com
+          POSTGRES_USER=fashop_user
+          POSTGRES_PASSWORD=fashop_password
+          POSTGRES_DB=fashop_db
+          REDIS_PASSWORD=fashop_redis_pass
+          APP_NAME=FastAPI Shop
+          DEBUG=False
+          CORS_ORIGINS=http://localhost:3000
+          EOF
+      
       - name: Test docker-compose
         run: |
           docker compose config

@@ -11,11 +11,11 @@ services:
       - ./backend:/app
       - backend_static:/app/static
     environment:
-      - APP_NAME=${APP_NAME:-FastAPI Shop}
-      - DEBUG=${DEBUG:-False}
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-fashop_user}:${POSTGRES_PASSWORD:-fashop_password}@postgres:5432/${POSTGRES_DB:-fashop_db}
-      - REDIS_URL=redis://default:${REDIS_PASSWORD:-fashop_redis_pass}@redis:6379/0
-      - CORS_ORIGINS=https://${DOMAIN},https://www.${DOMAIN}
+      APP_NAME: ${APP_NAME:-FastAPI Shop}
+      DEBUG: ${DEBUG:-False}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-fashop_user}:${POSTGRES_PASSWORD:-fashop_password}@postgres:5432/${POSTGRES_DB:-fashop_db}
+      REDIS_URL: redis://default:${REDIS_PASSWORD:-fashop_redis_pass}@redis:6379/0
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
     expose:
       - "8000"
     restart: unless-stopped
@@ -27,7 +27,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)" ]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -36,9 +36,9 @@ services:
     image: postgres:16-alpine
     container_name: fashop_postgres
     environment:
-      - POSTGRES_USER: ${POSTGRES_USER:-fashop-user}
-      - POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fashop-password}
-      - POSTGRES_DB: ${POSTGRES_DB:-fashop-db}
+      POSTGRES_USER: ${POSTGRES_USER:-fashop_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fashop_password}
+      POSTGRES_DB: ${POSTGRES_DB:-fashop_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -47,7 +47,7 @@ services:
     networks:
       - fashop_network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fashop-user}" ]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-fashop_user}"]
       interval: 10s
       timeout: 5s
       retries: 5
