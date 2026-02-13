@@ -185,6 +185,7 @@ docker-compose up -d
 
 4. **Run database migrations**
 ```bash
+docker-compose exec backend alembic revision --autogenerate -m "Initial migration"
 docker-compose exec backend alembic upgrade head
 ```
 
