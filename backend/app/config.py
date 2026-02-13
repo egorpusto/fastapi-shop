@@ -1,6 +1,7 @@
 from functools import lru_cache
-from typing import List, Union
+from typing import Union
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -17,12 +18,7 @@ class Settings(BaseSettings):
     cache_ttl: int = 300  # Default cache TTL in seconds
 
     # CORS settings
-    cors_origins: Union[List[str], str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-    ]
+    cors_origins: Union[str, list[str]] = "http://localhost:5173,http://localhost:3000"
 
     # Static files
     static_dir: str = "static"
@@ -32,9 +28,19 @@ class Settings(BaseSettings):
     default_page_size: int = 20
     max_page_size: int = 100
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS origins from string or list"""
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",")]
+        return v
+
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": False,
+        "extra": "ignore",
+    }
 
 
 @lru_cache()
@@ -46,4 +52,4 @@ def get_settings() -> Settings:
     return Settings()
 
 
-settings = Settings()
+settings = get_settings()
