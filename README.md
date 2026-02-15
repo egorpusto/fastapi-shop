@@ -563,6 +563,10 @@ docker-compose exec backend bash
 
 ## 📝 Development Notes
 
+### Images
+
+- Product images are placeholder paths. In production, upload real images to \`backend/static/images/\`
+
 ### Running Migrations
 ```bash
 # Create new migration
