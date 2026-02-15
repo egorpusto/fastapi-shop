@@ -35,7 +35,7 @@ export const useProductsStore = defineStore('products', () => {
         error.value = null
         try {
             const response = await productsAPI.getAll()
-            products.value = response.data.products
+            products.value = response.data.items
         } catch (err) {
             error.value = 'Failed to load products'
             console.error('Error fetching products:', err)
@@ -68,7 +68,7 @@ export const useProductsStore = defineStore('products', () => {
     async function fetchCategories() {
         try {
             const response = await categoriesAPI.getAll()
-            categories.value = response.data
+            categories.value = response.data.items
         } catch (err) {
             console.error('Error fetching categories:', err)
         }

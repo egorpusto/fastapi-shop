@@ -4,7 +4,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: fashop_backend
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./backend:/app
       - backend_static:/app/static
@@ -17,7 +17,7 @@ services:
     expose:
       - "8000"
     ports:
-      - 8000:8000
+      - "8000:8000"
     restart: unless-stopped
     networks:
       - fashop_network
@@ -26,12 +26,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
   postgres:
     image: postgres:16-alpine
     container_name: fashop_postgres
@@ -74,56 +68,15 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=http://localhost:8000/api
+        VITE_API_BASE_URL: http://localhost:8000/api
     container_name: fashop_frontend
     ports:
       - "3000:80"
-    depends_on:
-      backend:
-        condition: service_healthy
-    expose:
-      - "80"
     restart: unless-stopped
     networks:
       - fashop_network
-    healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/" ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
-
-  nginx:
-    image: nginx:alpine
-    container_name: fashop_nginx
-    volumes:
-      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - backend_static:/app/backend/static:ro
-      - ./certbot/www:/var/www/certbot:ro
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      - DOMAIN=${DOMAIN}
-    command: /bin/sh -c "envsubst '$${DOMAIN}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     depends_on:
       - backend
-      - frontend
-    restart: unless-stopped
-    networks:
-      - fashop_network
-
-  certbot:
-    image: certbot/certbot
-    container_name: fashop_certbot
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    restart: unless-stopped
-    networks:
-      - fashop_network
 
 networks:
   fashop_network:

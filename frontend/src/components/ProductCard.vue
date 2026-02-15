@@ -24,7 +24,7 @@
     <div class="p-4">
       <!-- Категория -->
       <div class="text-xs text-gray-500 uppercase tracking-wide mb-2">
-        {{ product.category.name }}
+        {{ getCategoryName }}
       </div>
 
       <!-- Название товара -->
@@ -35,7 +35,7 @@
       </router-link>
 
       <!-- Цена -->
-      <p class="text-2xl font-bold text-black mb-4">${{ product.price.toFixed(2) }}</p>
+      <p class="text-2xl font-bold text-black mb-4">${{ Number(product.price).toFixed(2) }}</p>
 
       <!-- Кнопка добавления в корзину -->
       <button
@@ -57,8 +57,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
+import { useProductsStore } from '@/stores/products'
 
 // Props
 const props = defineProps({
@@ -68,10 +69,19 @@ const props = defineProps({
   },
 })
 
-// State
+// Stores
 const cartStore = useCartStore()
+const productsStore = useProductsStore()
+
+// State
 const adding = ref(false)
 const showNotification = ref(false)
+
+// Computed: получить имя категории по ID
+const getCategoryName = computed(() => {
+  const category = productsStore.categories.find(c => c.id === props.product.category_id)
+  return category?.name || 'Unknown'
+})
 
 /**
  * Добавить товар в корзину
