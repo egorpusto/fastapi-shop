@@ -239,6 +239,14 @@ npm install
 npm run dev
 ```
 
+### Production Deployment
+
+For production with SSL/Nginx:
+```bash
+# Use production compose file
+docker-compose -f docker-compose.prod.yml up -d
+```
+
 ## 🧪 Testing
 
 ### Run all tests
