@@ -96,9 +96,7 @@ async def test_update_category(client: AsyncClient, test_category):
     """Test updating a category"""
     update_data = {"name": "Updated Category", "description": "Updated description"}
 
-    response = await client.patch(
-        f"/api/categories/{test_category.id}", json=update_data
-    )
+    response = await client.patch(f"/api/categories/{test_category.id}", json=update_data)
 
     assert response.status_code == 200
     data = response.json()
@@ -121,9 +119,7 @@ async def test_delete_category(client: AsyncClient, test_category):
 
 
 @pytest.mark.asyncio
-async def test_get_categories_with_product_count(
-    client: AsyncClient, test_category, test_product
-):
+async def test_get_categories_with_product_count(client: AsyncClient, test_category, test_product):
     """Test getting categories with product count"""
     response = await client.get("/api/categories?with_product_count=true")
 

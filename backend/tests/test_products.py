@@ -1,6 +1,7 @@
+from decimal import Decimal
+
 import pytest
 from httpx import AsyncClient
-from decimal import Decimal
 
 
 @pytest.mark.asyncio
@@ -115,9 +116,7 @@ async def test_delete_product(client: AsyncClient, test_product):
 
 
 @pytest.mark.asyncio
-async def test_filter_products_by_category(
-    client: AsyncClient, test_product, test_category
-):
+async def test_filter_products_by_category(client: AsyncClient, test_product, test_category):
     """Test filtering products by category"""
     response = await client.get(f"/api/products?category_id={test_category.id}")
 
@@ -193,9 +192,7 @@ async def test_pagination(client: AsyncClient, db_session, test_category):
 async def test_check_product_availability(client: AsyncClient, test_product):
     """Test checking product stock availability"""
     # Available quantity
-    response = await client.get(
-        f"/api/products/{test_product.id}/availability?quantity=5"
-    )
+    response = await client.get(f"/api/products/{test_product.id}/availability?quantity=5")
 
     assert response.status_code == 200
     data = response.json()
@@ -203,8 +200,6 @@ async def test_check_product_availability(client: AsyncClient, test_product):
     assert data["quantity"] == 5
 
     # Unavailable quantity (stock is 10)
-    response = await client.get(
-        f"/api/products/{test_product.id}/availability?quantity=20"
-    )
+    response = await client.get(f"/api/products/{test_product.id}/availability?quantity=20")
     data = response.json()
     assert data["available"] is False

@@ -1,9 +1,11 @@
 import asyncio
+from decimal import Decimal
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.database import async_session_maker, init_db
 from app.models.category import Category
 from app.models.product import Product
-from decimal import Decimal
 
 
 async def seed_categories(db: AsyncSession):

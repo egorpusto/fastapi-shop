@@ -1,6 +1,7 @@
+from decimal import Decimal
+
 import pytest
 from httpx import AsyncClient
-from decimal import Decimal
 
 
 @pytest.mark.asyncio
@@ -68,9 +69,7 @@ async def test_add_duplicate_item_updates_quantity(client: AsyncClient, test_pro
     session_cookie = response1.cookies.get("cart_session_id")
 
     # Add again with same session
-    response2 = await client.post(
-        "/api/cart", json=cart_item, cookies={"cart_session_id": session_cookie}
-    )
+    response2 = await client.post("/api/cart", json=cart_item, cookies={"cart_session_id": session_cookie})
 
     assert response2.status_code == 200
     data = response2.json()
@@ -121,9 +120,7 @@ async def test_remove_item_from_cart(client: AsyncClient, test_product):
     session_cookie = response.cookies.get("cart_session_id")
 
     # Remove item
-    response = await client.delete(
-        f"/api/cart/{test_product.id}", cookies={"cart_session_id": session_cookie}
-    )
+    response = await client.delete(f"/api/cart/{test_product.id}", cookies={"cart_session_id": session_cookie})
 
     assert response.status_code == 200
     data = response.json()
@@ -150,9 +147,7 @@ async def test_clear_cart(client: AsyncClient, test_product, db_session):
     await db_session.refresh(product2)
 
     # Add both products to cart
-    response = await client.post(
-        "/api/cart", json={"product_id": test_product.id, "quantity": 2}
-    )
+    response = await client.post("/api/cart", json={"product_id": test_product.id, "quantity": 2})
     session_cookie = response.cookies.get("cart_session_id")
 
     await client.post(
@@ -162,9 +157,7 @@ async def test_clear_cart(client: AsyncClient, test_product, db_session):
     )
 
     # Clear cart
-    response = await client.delete(
-        "/api/cart", cookies={"cart_session_id": session_cookie}
-    )
+    response = await client.delete("/api/cart", cookies={"cart_session_id": session_cookie})
 
     assert response.status_code == 200
     data = response.json()
@@ -172,16 +165,12 @@ async def test_clear_cart(client: AsyncClient, test_product, db_session):
     assert "cleared" in data["message"].lower()
 
     # Verify cart is empty
-    get_response = await client.get(
-        "/api/cart", cookies={"cart_session_id": session_cookie}
-    )
+    get_response = await client.get("/api/cart", cookies={"cart_session_id": session_cookie})
     assert get_response.json()["total_items"] == 0
 
 
 @pytest.mark.asyncio
-async def test_cart_with_multiple_products(
-    client: AsyncClient, test_product, db_session
-):
+async def test_cart_with_multiple_products(client: AsyncClient, test_product, db_session):
     """Test cart with multiple different products"""
     from app.models.product import Product
 
@@ -204,9 +193,7 @@ async def test_cart_with_multiple_products(
         await db_session.refresh(p)
 
     # Add all products to cart
-    response = await client.post(
-        "/api/cart", json={"product_id": test_product.id, "quantity": 2}
-    )
+    response = await client.post("/api/cart", json={"product_id": test_product.id, "quantity": 2})
     session_cookie = response.cookies.get("cart_session_id")
 
     for product in products:
@@ -217,9 +204,7 @@ async def test_cart_with_multiple_products(
         )
 
     # Get cart
-    response = await client.get(
-        "/api/cart", cookies={"cart_session_id": session_cookie}
-    )
+    response = await client.get("/api/cart", cookies={"cart_session_id": session_cookie})
 
     assert response.status_code == 200
     data = response.json()
@@ -227,9 +212,7 @@ async def test_cart_with_multiple_products(
     assert data["total_items"] == 5  # 2 + 1 + 1 + 1
 
     # Verify total price calculation
-    expected_total = (
-        (Decimal("99.99") * 2) + Decimal("25.00") + Decimal("30.00") + Decimal("35.00")
-    )
+    expected_total = (Decimal("99.99") * 2) + Decimal("25.00") + Decimal("30.00") + Decimal("35.00")
     assert Decimal(data["total_price"]) == expected_total
 
 
@@ -237,15 +220,11 @@ async def test_cart_with_multiple_products(
 async def test_cart_session_persistence(client: AsyncClient, test_product):
     """Test that cart persists across requests with same session"""
     # Add item
-    response1 = await client.post(
-        "/api/cart", json={"product_id": test_product.id, "quantity": 2}
-    )
+    response1 = await client.post("/api/cart", json={"product_id": test_product.id, "quantity": 2})
     session_cookie = response1.cookies.get("cart_session_id")
 
     # Get cart in new request with same session
-    response2 = await client.get(
-        "/api/cart", cookies={"cart_session_id": session_cookie}
-    )
+    response2 = await client.get("/api/cart", cookies={"cart_session_id": session_cookie})
 
     assert response2.status_code == 200
     data = response2.json()
@@ -254,14 +233,10 @@ async def test_cart_session_persistence(client: AsyncClient, test_product):
 
 
 @pytest.mark.asyncio
-async def test_cart_ignores_inactive_products(
-    client: AsyncClient, test_product, db_session
-):
+async def test_cart_ignores_inactive_products(client: AsyncClient, test_product, db_session):
     """Test that cart filters out inactive products"""
     # Add product to cart
-    response = await client.post(
-        "/api/cart", json={"product_id": test_product.id, "quantity": 2}
-    )
+    response = await client.post("/api/cart", json={"product_id": test_product.id, "quantity": 2})
     session_cookie = response.cookies.get("cart_session_id")
 
     # Deactivate product
@@ -269,9 +244,7 @@ async def test_cart_ignores_inactive_products(
     await db_session.commit()
 
     # Get cart - should be empty
-    response = await client.get(
-        "/api/cart", cookies={"cart_session_id": session_cookie}
-    )
+    response = await client.get("/api/cart", cookies={"cart_session_id": session_cookie})
 
     assert response.status_code == 200
     data = response.json()
