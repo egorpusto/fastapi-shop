@@ -131,9 +131,7 @@ class CategoryService:
     async def update_category(self, category_id: int, category_data: CategoryUpdate) -> CategoryResponse:
         """Update category and invalidate cache"""
         # Filter out None values
-        update_data = {
-            k: v for k, v in category_data.model_dump(exclude_unset=True).items()
-        }
+        update_data = {k: v for k, v in category_data.model_dump(exclude_unset=True).items()}
 
         if not update_data:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")

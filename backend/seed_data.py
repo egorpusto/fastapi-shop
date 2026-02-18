@@ -46,9 +46,7 @@ async def seed_categories(db: AsyncSession):
 
     created = 0
     for cat_data in categories_data:
-        result = await db.execute(
-            select(Category).where(Category.slug == cat_data["slug"])
-        )
+        result = await db.execute(select(Category).where(Category.slug == cat_data["slug"]))
         existing = result.scalar_one_or_none()
         if not existing:
             category = Category(**cat_data)
@@ -170,9 +168,7 @@ async def seed_products(db: AsyncSession):
 
     created = 0
     for prod_data in products_data:
-        result = await db.execute(
-            select(Product).where(Product.name == prod_data["name"])
-        )
+        result = await db.execute(select(Product).where(Product.name == prod_data["name"]))
         existing = result.scalar_one_or_none()
         if not existing:
             product = Product(**prod_data)

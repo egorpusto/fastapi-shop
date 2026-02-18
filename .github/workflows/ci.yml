@@ -94,7 +94,7 @@ jobs:
           REDIS_PASSWORD: ""
         run: |
           cd backend
-          pytest --cov=app --cov-report=xml --cov-report=term-missing -v
+          pytest --cov=app --cov-report=xml --cov-report=term-missing --cov-fail-under=45 -v
       
       - name: Check coverage threshold
         run: |

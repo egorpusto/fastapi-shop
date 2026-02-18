@@ -129,9 +129,7 @@ class ProductService:
     async def update_product(self, product_id: int, product_data: ProductUpdate) -> ProductResponse:
         """Update product and invalidate cache"""
         # Filter out None values
-        update_data = {
-            k: v for k, v in product_data.model_dump(exclude_unset=True).items()
-        }
+        update_data = {k: v for k, v in product_data.model_dump(exclude_unset=True).items()}
 
         if not update_data:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")

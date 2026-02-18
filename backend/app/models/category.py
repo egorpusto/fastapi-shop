@@ -5,8 +5,10 @@ from sqlalchemy.orm import relationship
 
 from ..database import Base
 
+
 def utcnow():
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
 
 class Category(Base):
     __tablename__ = "categories"

@@ -15,11 +15,14 @@ from app.main import app
 # Test database URL (use separate test database)
 # Inside Docker use 'postgres' as the host, locally - 'localhost'
 DB_HOST = os.getenv("DB_HOST", "postgres")
-TEST_DATABASE_URL = f"postgresql+asyncpg://fashop_user:fashop_password@{DB_HOST}:5432/fashop_test_db"
+TEST_DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    f"postgresql+asyncpg://fashop_user:fashop_password@{DB_HOST}:5432/fashop_test_db"
+)
 
 # Test Redis URL
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
-TEST_REDIS_URL = f"redis://default:fashop_redis_pass@{REDIS_HOST}:6379/1"
+TEST_REDIS_URL = os.getenv("REDIS_URL", f"redis://{REDIS_HOST}:6379/1")
 
 # Create test engine
 test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool, echo=False)
@@ -32,6 +35,7 @@ test_async_session_maker = async_sessionmaker(
     autocommit=False,
     autoflush=False,
 )
+
 
 @pytest.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -79,7 +83,7 @@ async def test_category(db_session: AsyncSession):
         name="Test Category",
         slug="test-category",
         description="Test category description",
-        is_active=1,
+        is_active=True,
     )
     db_session.add(category)
     await db_session.commit()
@@ -100,7 +104,7 @@ async def test_product(db_session: AsyncSession, test_category):
         price=Decimal("99.99"),
         category_id=test_category.id,
         stock_quantity=10,
-        is_active=1,
+        is_active=True,
         image_url="/static/images/test.jpg",
     )
     db_session.add(product)
@@ -118,11 +122,8 @@ async def clear_redis_cache():
     original_url = settings.redis_url
 
     import redis.asyncio as redis
-    test_redis = await redis.from_url(
-        TEST_REDIS_URL,
-        encoding="utf-8",
-        decode_responses=True
-    )
+
+    test_redis = await redis.from_url(TEST_REDIS_URL, encoding="utf-8", decode_responses=True)
     cache.redis_client = test_redis
 
     await test_redis.flushdb()

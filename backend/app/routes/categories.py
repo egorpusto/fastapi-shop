@@ -28,6 +28,7 @@ async def get_categories(
     service = CategoryService(db)
     return await service.get_all_categories(include_inactive=include_inactive, with_product_count=with_product_count)
 
+
 @router.get("/slug/{slug}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
 async def get_category_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
     """
@@ -49,7 +50,6 @@ async def get_category(category_id: int, db: AsyncSession = Depends(get_db)):
     """
     service = CategoryService(db)
     return await service.get_category_by_id(category_id)
-
 
 
 @router.post("", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
