@@ -64,7 +64,7 @@
             <!-- Детали заказа -->
             <div class="space-y-6 mb-8">
               <div class="flex justify-between text-lg text-gray-600">
-                <span>Items ({{ cartStore.cartDetails?.items_count }})</span>
+                <span>Items ({{ cartStore.itemsCount }})</span>
                 <span>${{ cartStore.totalPrice.toFixed(2) }}</span>
               </div>
 
@@ -140,6 +140,6 @@ function handleClearCart() {
  * Загрузить данные корзины при монтировании
  */
 onMounted(async () => {
-  await cartStore.fetchCartDetails()
+    await cartStore.fetchCart()
 })
 </script>

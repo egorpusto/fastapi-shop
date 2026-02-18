@@ -63,7 +63,7 @@ class CartService:
             product_id = int(product_id_str)
             product = await self.product_repo.get_by_id(product_id)
 
-            if not product or product.is_active == 0:
+            if not product or not product.is_active:
                 # Product not found or inactive - skip it
                 logger.warning("cart_product_not_found", product_id=product_id)
                 continue

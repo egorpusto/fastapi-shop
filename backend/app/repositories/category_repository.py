@@ -21,7 +21,7 @@ class CategoryRepository:
         query = select(Category)
 
         if not include_inactive:
-            query = query.where(Category.is_active == 1)
+            query = query.where(Category.is_active == True)
 
         query = query.order_by(Category.name)
 
@@ -36,7 +36,7 @@ class CategoryRepository:
         query = select(Category).options(selectinload(Category.products))
 
         if not include_inactive:
-            query = query.where(Category.is_active == 1)
+            query = query.where(Category.is_active == True)
 
         query = query.order_by(Category.name)
 
@@ -81,8 +81,7 @@ class CategoryRepository:
             return None
 
         for key, value in category_data.items():
-            if value is not None:
-                setattr(category, key, value)
+            setattr(category, key, value)
 
         await self.db.commit()
         await self.db.refresh(category)
@@ -94,13 +93,13 @@ class CategoryRepository:
         if not category:
             return False
 
-        category.is_active = 0
+        category.is_active = False
         await self.db.commit()
         return True
 
     async def exists(self, category_id: int) -> bool:
         """Check if category exists and is active"""
-        query = select(func.count()).where(Category.id == category_id, Category.is_active == 1)
+        query = select(func.count()).where(Category.id == category_id, Category.is_active == True)
         result = await self.db.execute(query)
         count = result.scalar()
         return count > 0

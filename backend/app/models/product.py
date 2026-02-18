@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     ForeignKey,
@@ -14,6 +15,8 @@ from sqlalchemy.orm import relationship
 
 from ..database import Base
 
+def utcnow():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class Product(Base):
     __tablename__ = "products"
@@ -25,9 +28,9 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False)
     image_url = Column(String(500))
     stock_quantity = Column(Integer, default=0)  # Track inventory
-    is_active = Column(Integer, default=1)  # Soft delete support
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = Column(Boolean, default=True, nullable=False)  # Soft delete support
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
     # Relationships
     category = relationship("Category", back_populates="products")

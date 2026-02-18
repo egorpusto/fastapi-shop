@@ -37,7 +37,8 @@ async def lifespan(app: FastAPI):
 
     # Connect to Redis
     await cache.connect()
-    logger.info("redis_connected", redis_url=settings.redis_url.split("@")[1])
+    redis_host = settings.redis_url.split("@")[-1] if "@" in settings.redis_url else settings.redis_url
+    logger.info("redis_connected", redis_host=redis_host)
 
     yield
 

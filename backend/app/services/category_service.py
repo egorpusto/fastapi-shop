@@ -34,7 +34,7 @@ class CategoryService:
         cached_data = await cache.get(cache_key)
         if cached_data:
             logger.info("categories_cache_hit", key=cache_key)
-            return CategoryListResponse(**cached_data)
+            return CategoryListResponse.model_validate(cached_data)
 
         # Get from database
         if with_product_count:
@@ -60,7 +60,7 @@ class CategoryService:
         cached_data = await cache.get(cache_key)
         if cached_data:
             logger.info("category_cache_hit", category_id=category_id)
-            return CategoryResponse(**cached_data)
+            return CategoryResponse.model_validate(cached_data)
 
         # Get from database
         category = await self.repository.get_by_id(category_id)
@@ -87,7 +87,7 @@ class CategoryService:
         cached_data = await cache.get(cache_key)
         if cached_data:
             logger.info("category_slug_cache_hit", slug=slug)
-            return CategoryResponse(**cached_data)
+            return CategoryResponse.model_validate(cached_data)
 
         # Get from database
         category = await self.repository.get_by_slug(slug)
@@ -131,7 +131,9 @@ class CategoryService:
     async def update_category(self, category_id: int, category_data: CategoryUpdate) -> CategoryResponse:
         """Update category and invalidate cache"""
         # Filter out None values
-        update_data = {k: v for k, v in category_data.model_dump().items() if v is not None}
+        update_data = {
+            k: v for k, v in category_data.model_dump(exclude_unset=True).items()
+        }
 
         if not update_data:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")

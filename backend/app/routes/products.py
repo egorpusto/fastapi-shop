@@ -53,17 +53,6 @@ async def get_products(
     return await service.get_all_products(page=page, page_size=page_size, filters=filters)
 
 
-@router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
-async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Get single product by ID.
-
-    Returns 404 if product not found.
-    """
-    service = ProductService(db)
-    return await service.get_product_by_id(product_id)
-
-
 @router.get(
     "/category/{category_id}",
     response_model=ProductListResponse,
@@ -96,6 +85,34 @@ async def create_product(product_data: ProductCreate, db: AsyncSession = Depends
     return await service.create_product(product_data)
 
 
+@router.get("/{product_id}/availability", status_code=status.HTTP_200_OK)
+async def check_product_availability(
+    product_id: int,
+    quantity: int = Query(..., ge=1, description="Requested quantity"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Check if product is available in requested quantity.
+
+    Useful before adding to cart or placing order.
+    """
+    service = ProductService(db)
+    available = await service.check_availability(product_id, quantity)
+
+    return {"product_id": product_id, "quantity": quantity, "available": available}
+
+
+@router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
+async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Get single product by ID.
+
+    Returns 404 if product not found.
+    """
+    service = ProductService(db)
+    return await service.get_product_by_id(product_id)
+
+
 @router.patch("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def update_product(product_id: int, product_data: ProductUpdate, db: AsyncSession = Depends(get_db)):
     """
@@ -118,20 +135,3 @@ async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
     """
     service = ProductService(db)
     return await service.delete_product(product_id)
-
-
-@router.get("/{product_id}/availability", status_code=status.HTTP_200_OK)
-async def check_product_availability(
-    product_id: int,
-    quantity: int = Query(..., ge=1, description="Requested quantity"),
-    db: AsyncSession = Depends(get_db),
-):
-    """
-    Check if product is available in requested quantity.
-
-    Useful before adding to cart or placing order.
-    """
-    service = ProductService(db)
-    available = await service.check_availability(product_id, quantity)
-
-    return {"product_id": product_id, "quantity": quantity, "available": available}

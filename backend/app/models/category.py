@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Index, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Index, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from ..database import Base
 
+def utcnow():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class Category(Base):
     __tablename__ = "categories"
@@ -13,9 +15,9 @@ class Category(Base):
     name = Column(String(100), unique=True, nullable=False, index=True)
     description = Column(Text)
     slug = Column(String(100), unique=True, index=True)  # URL-friendly name
-    is_active = Column(Integer, default=1)  # ← ИСПРАВЛЕНО: было Index, стало Integer
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
     # Relationships
     products = relationship("Product", back_populates="category", cascade="all, delete-orphan")

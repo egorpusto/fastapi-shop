@@ -50,7 +50,7 @@ class ProductService:
         cached_data = await cache.get(cache_key)
         if cached_data:
             logger.info("products_cache_hit", key=cache_key)
-            return ProductListResponse(**cached_data)
+            return ProductListResponse.model_validate(cached_data)
 
         # Calculate pagination
         skip = (page - 1) * page_size
@@ -84,7 +84,7 @@ class ProductService:
         cached_data = await cache.get(cache_key)
         if cached_data:
             logger.info("product_cache_hit", product_id=product_id)
-            return ProductResponse(**cached_data)
+            return ProductResponse.model_validate(cached_data)
 
         # Get from database
         product = await self.repository.get_by_id(product_id)
@@ -129,7 +129,9 @@ class ProductService:
     async def update_product(self, product_id: int, product_data: ProductUpdate) -> ProductResponse:
         """Update product and invalidate cache"""
         # Filter out None values
-        update_data = {k: v for k, v in product_data.model_dump().items() if v is not None}
+        update_data = {
+            k: v for k, v in product_data.model_dump(exclude_unset=True).items()
+        }
 
         if not update_data:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
@@ -144,6 +146,7 @@ class ProductService:
         # Invalidate cache
         await cache.delete(f"product:{product_id}")
         await cache.clear_pattern("products:*")
+        await cache.clear_pattern("categories:*")
 
         logger.info("product_updated", product_id=product_id)
 
@@ -161,6 +164,7 @@ class ProductService:
         # Invalidate cache
         await cache.delete(f"product:{product_id}")
         await cache.clear_pattern("products:*")
+        await cache.clear_pattern("categories:*")
 
         logger.info("product_deleted", product_id=product_id)
 

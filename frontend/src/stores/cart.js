@@ -1,119 +1,81 @@
 // frontend/src/stores/cart.js
-/**
- * Pinia store для управления корзиной покупок.
- * Хранит состояние корзины в localStorage и синхронизирует с backend.
- * Следует принципу Single Responsibility - отвечает только за логику корзины.
- */
-
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { cartAPI } from '@/services/api'
 
-const CART_STORAGE_KEY = 'shopping_cart'
-
 export const useCartStore = defineStore('cart', () => {
-    // State - храним корзину как объект {product_id: quantity}
-    const cartItems = ref({})
-    const cartDetails = ref(null)
+    // State
+    const cartDetails = ref(null)  // CartResponse от бэкенда
     const loading = ref(false)
+    const error = ref(null)
 
     // Getters
-    const itemsCount = computed(() => {
-        return Object.values(cartItems.value).reduce((sum, qty) => sum + qty, 0)
-    })
+    const items = computed(() => cartDetails.value?.items ?? [])
 
-    const totalPrice = computed(() => {
-        return cartDetails.value?.total || 0
-    })
+    const itemsCount = computed(() => cartDetails.value?.total_items ?? 0)
 
-    const hasItems = computed(() => {
-        return Object.keys(cartItems.value).length > 0
-    })
+    const totalPrice = computed(() => Number(cartDetails.value?.total_price ?? 0))
+
+    const hasItems = computed(() => itemsCount.value > 0)
 
     // Actions
-    /**
-     * Инициализировать корзину из localStorage
-     */
-    function initCart() {
-        const savedCart = localStorage.getItem(CART_STORAGE_KEY)
-        if (savedCart) {
-            try {
-                cartItems.value = JSON.parse(savedCart)
-            } catch (e) {
-                console.error('Error parsing cart from localStorage:', e)
-                cartItems.value = {}
-            }
-        }
-    }
 
     /**
-     * Сохранить корзину в localStorage
+     * Загрузить корзину с бэкенда (состояние хранится в Redis по cookie)
      */
-    function saveCart() {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems.value))
-    }
-
-    /**
-     * Добавить товар в корзину
-     */
-    async function addToCart(productId, quantity = 1) {
-        try {
-            const item = {
-                product_id: productId,
-                quantity: quantity,
-            }
-            const response = await cartAPI.addItem(item, cartItems.value)
-            cartItems.value = response.data.cart
-            saveCart()
-            await fetchCartDetails()
-            return true
-        } catch (err) {
-            console.error('Error adding to cart:', err)
-            return false
-        }
-    }
-
-    /**
-     * Получить детальную информацию о корзине
-     */
-    async function fetchCartDetails() {
-        if (!hasItems.value) {
-            cartDetails.value = { items: [], total: 0, items_count: 0 }
-            return
-        }
-
+    async function fetchCart() {
         loading.value = true
+        error.value = null
         try {
-            const response = await cartAPI.getCart(cartItems.value)
+            const response = await cartAPI.getCart()
             cartDetails.value = response.data
         } catch (err) {
-            console.error('Error fetching cart details:', err)
+            console.error('Error fetching cart:', err)
+            error.value = 'Failed to load cart'
         } finally {
             loading.value = false
         }
     }
 
     /**
-     * Обновить количество товара
+     * Добавить товар в корзину
+     */
+    async function addToCart(productId, quantity = 1) {
+        loading.value = true
+        error.value = null
+        try {
+            const response = await cartAPI.addItem(productId, quantity)
+            cartDetails.value = response.data
+            return true
+        } catch (err) {
+            console.error('Error adding to cart:', err)
+            error.value = err.response?.data?.detail ?? 'Failed to add item'
+            return false
+        } finally {
+            loading.value = false
+        }
+    }
+
+    /**
+     * Обновить количество товара в корзине
      */
     async function updateQuantity(productId, quantity) {
         if (quantity <= 0) {
             return removeFromCart(productId)
         }
 
+        loading.value = true
+        error.value = null
         try {
-            const item = {
-                product_id: productId,
-                quantity: quantity,
-            }
-            const response = await cartAPI.updateItem(item, cartItems.value)
-            cartItems.value = response.data.cart
-            saveCart()
-            await fetchCartDetails()
+            const response = await cartAPI.updateItem(productId, quantity)
+            cartDetails.value = response.data
             return true
         } catch (err) {
             console.error('Error updating cart:', err)
+            error.value = err.response?.data?.detail ?? 'Failed to update item'
             return false
+        } finally {
+            loading.value = false
         }
     }
 
@@ -121,40 +83,53 @@ export const useCartStore = defineStore('cart', () => {
      * Удалить товар из корзины
      */
     async function removeFromCart(productId) {
+        loading.value = true
+        error.value = null
         try {
-            const response = await cartAPI.removeItem(productId, cartItems.value)
-            cartItems.value = response.data.cart
-            saveCart()
-            await fetchCartDetails()
+            const response = await cartAPI.removeItem(productId)
+            cartDetails.value = response.data
             return true
         } catch (err) {
             console.error('Error removing from cart:', err)
+            error.value = err.response?.data?.detail ?? 'Failed to remove item'
             return false
+        } finally {
+            loading.value = false
         }
     }
 
     /**
      * Очистить корзину
      */
-    function clearCart() {
-        cartItems.value = {}
-        cartDetails.value = null
-        localStorage.removeItem(CART_STORAGE_KEY)
+    async function clearCart() {
+        loading.value = true
+        error.value = null
+        try {
+            await cartAPI.clearCart()
+            cartDetails.value = null
+            return true
+        } catch (err) {
+            console.error('Error clearing cart:', err)
+            error.value = 'Failed to clear cart'
+            return false
+        } finally {
+            loading.value = false
+        }
     }
 
     return {
         // State
-        cartItems,
         cartDetails,
         loading,
+        error,
         // Getters
+        items,
         itemsCount,
         totalPrice,
         hasItems,
         // Actions
-        initCart,
+        fetchCart,
         addToCart,
-        fetchCartDetails,
         updateQuantity,
         removeFromCart,
         clearCart,

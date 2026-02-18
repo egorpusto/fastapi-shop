@@ -37,7 +37,7 @@ const cartStore = useCartStore()
  */
 onMounted(() => {
   // Загрузить корзину из localStorage при запуске
-  cartStore.initCart()
+  cartStore.fetchCart()
 })
 </script>
 

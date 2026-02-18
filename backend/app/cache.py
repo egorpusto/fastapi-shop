@@ -80,15 +80,16 @@ class RedisCache:
     async def clear_pattern(self, pattern: str) -> int:
         """
         Delete all keys matching pattern.
-        Example: clear_pattern("products:*") deletes all product cache.
+        Uses SCAN instead of KEYS to avoid blocking Redis.
         """
         if not self.redis_client:
             await self.connect()
 
-        keys = await self.redis_client.keys(pattern)
-        if keys:
-            return await self.redis_client.delete(*keys)
-        return 0
+        deleted = 0
+        async for key in self.redis_client.scan_iter(match=pattern, count=100):
+            await self.redis_client.delete(key)
+            deleted += 1
+        return deleted
 
 
 # Global cache instance

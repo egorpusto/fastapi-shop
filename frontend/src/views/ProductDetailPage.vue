@@ -66,7 +66,7 @@
           <div class="flex flex-col">
             <!-- Категория -->
             <div class="text-sm text-gray-500 uppercase tracking-wider mb-3 font-medium">
-              {{ product.category.name }}
+              {{ getCategoryName(product.category_id) }}
             </div>
 
             <!-- Название -->
@@ -76,7 +76,7 @@
 
             <!-- Цена -->
             <div class="text-2xl sm:text-3xl font-bold text-black mb-6">
-              ${{ product.price.toFixed(2) }}
+              ${{ Number(product.price).toFixed(2) }}
             </div>
 
             <!-- Описание -->
@@ -139,6 +139,14 @@ const adding = ref(false)
 const showNotification = ref(false)
 
 /**
+ * Получить название категории по ID
+ */
+function getCategoryName(categoryId) {
+  const category = productsStore.categories.find(c => c.id === categoryId)
+  return category?.name || 'Unknown'
+}
+
+/**
  * Загрузить данные товара
  */
 async function loadProduct() {
@@ -146,6 +154,11 @@ async function loadProduct() {
   error.value = null
 
   try {
+    // Загрузить категории если ещё нет
+    if (productsStore.categories.length === 0) {
+      await productsStore.fetchCategories()
+    }
+    
     const productId = parseInt(route.params.id)
     product.value = await productsStore.fetchProductById(productId)
   } catch (err) {

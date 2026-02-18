@@ -1,4 +1,5 @@
 import asyncio
+import os
 from typing import AsyncGenerator, Generator
 
 import pytest
@@ -12,7 +13,13 @@ from app.database import Base, get_db
 from app.main import app
 
 # Test database URL (use separate test database)
-TEST_DATABASE_URL = "postgresql+asyncpg://fashop_user:fashop_password@localhost:5432/fashop_test_db"
+# Inside Docker use 'postgres' as the host, locally - 'localhost'
+DB_HOST = os.getenv("DB_HOST", "postgres")
+TEST_DATABASE_URL = f"postgresql+asyncpg://fashop_user:fashop_password@{DB_HOST}:5432/fashop_test_db"
+
+# Test Redis URL
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+TEST_REDIS_URL = f"redis://default:fashop_redis_pass@{REDIS_HOST}:6379/1"
 
 # Create test engine
 test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool, echo=False)
@@ -25,15 +32,6 @@ test_async_session_maker = async_sessionmaker(
     autocommit=False,
     autoflush=False,
 )
-
-
-@pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """Create event loop for async tests"""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
 
 @pytest.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -113,10 +111,21 @@ async def test_product(db_session: AsyncSession, test_category):
 
 @pytest.fixture(scope="function", autouse=True)
 async def clear_redis_cache():
-    """Clear Redis cache before each test"""
-    await cache.connect()
-    if cache.redis_client:
-        await cache.redis_client.flushdb()
+    """Clear Redis cache before each test using test database"""
+    from app.cache import cache
+    from app.config import settings
+
+    original_url = settings.redis_url
+
+    import redis.asyncio as redis
+    test_redis = await redis.from_url(
+        TEST_REDIS_URL,
+        encoding="utf-8",
+        decode_responses=True
+    )
+    cache.redis_client = test_redis
+
+    await test_redis.flushdb()
     yield
-    if cache.redis_client:
-        await cache.redis_client.flushdb()
+    await test_redis.flushdb()
+    await test_redis.close()

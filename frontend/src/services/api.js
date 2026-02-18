@@ -8,7 +8,7 @@
 import axios from 'axios'
 
 // Базовый URL API из переменных окружения или значение по умолчанию
-const API_BASE_URL = 'http://localhost:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
 // Создаем экземпляр axios с настройками по умолчанию
 const apiClient = axios.create({
@@ -16,6 +16,7 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true, // Включаем отправку cookies для аутентификации
 })
 
 /**
@@ -68,43 +69,38 @@ export const categoriesAPI = {
  */
 export const cartAPI = {
     /**
-     * Добавить товар в корзину
+     * Получить содержимое корзины
      */
-    addItem(item, cartData) {
-        return apiClient.post('/cart/add', {
-            product_id: item.product_id,
-            quantity: item.quantity,
-            cart: cartData,
-        })
+    getCart() {
+        return apiClient.get('/cart')
     },
 
     /**
-     * Получить содержимое корзины
+     * Добавить товар в корзину
      */
-    getCart(cartData) {
-        return apiClient.post('/cart', cartData)
+    addItem(productId, quantity) {
+        return apiClient.post('/cart', { product_id: productId, quantity })
     },
 
     /**
      * Обновить количество товара
      */
-    updateItem(item, cartData) {
-        return apiClient.put('/cart/update', {
-            product_id: item.product_id,
-            quantity: item.quantity,
-            cart: cartData,
-        })
+    updateItem(productId, quantity) {
+        return apiClient.patch(`/cart/${productId}`, { quantity })
     },
 
     /**
      * Удалить товар из корзины
      */
-    removeItem(productId, cartData) {
-        return apiClient.delete(`/cart/remove/${productId}`, {
-            data: {
-                cart: cartData,
-            },
-        })
+    removeItem(productId) {
+        return apiClient.delete(`/cart/${productId}`)
+    },
+
+    /**
+     * Очистить корзину
+     */
+    clearCart() {
+        return apiClient.delete('/cart')
     },
 }
 

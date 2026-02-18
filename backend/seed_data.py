@@ -1,6 +1,7 @@
 import asyncio
 from decimal import Decimal
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import async_session_maker, init_db
@@ -15,40 +16,47 @@ async def seed_categories(db: AsyncSession):
             "name": "Electronics",
             "slug": "electronics",
             "description": "Electronic devices and gadgets",
-            "is_active": 1,
+            "is_active": True,
         },
         {
             "name": "Clothing",
             "slug": "clothing",
             "description": "Fashion and apparel",
-            "is_active": 1,
+            "is_active": True,
         },
         {
             "name": "Books",
             "slug": "books",
             "description": "Books and educational materials",
-            "is_active": 1,
+            "is_active": True,
         },
         {
             "name": "Home & Garden",
             "slug": "home-garden",
             "description": "Home improvement and garden supplies",
-            "is_active": 1,
+            "is_active": True,
         },
         {
             "name": "Sports",
             "slug": "sports",
             "description": "Sports equipment and fitness gear",
-            "is_active": 1,
+            "is_active": True,
         },
     ]
 
+    created = 0
     for cat_data in categories_data:
-        category = Category(**cat_data)
-        db.add(category)
+        result = await db.execute(
+            select(Category).where(Category.slug == cat_data["slug"])
+        )
+        existing = result.scalar_one_or_none()
+        if not existing:
+            category = Category(**cat_data)
+            db.add(category)
+            created += 1
 
     await db.commit()
-    print(f"✓ Created {len(categories_data)} categories")
+    print(f"✓ Categories: {created} created, {len(categories_data) - created} skipped")
 
 
 async def seed_products(db: AsyncSession):
@@ -61,7 +69,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("149.99"),
             "category_id": 1,
             "stock_quantity": 50,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/headphones.jpg",
         },
         {
@@ -70,7 +78,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("299.99"),
             "category_id": 1,
             "stock_quantity": 30,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/smartwatch.jpg",
         },
         {
@@ -79,7 +87,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("49.99"),
             "category_id": 1,
             "stock_quantity": 100,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/laptop-stand.jpg",
         },
         # Clothing
@@ -89,7 +97,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("19.99"),
             "category_id": 2,
             "stock_quantity": 200,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/tshirt.jpg",
         },
         {
@@ -98,7 +106,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("59.99"),
             "category_id": 2,
             "stock_quantity": 150,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/jeans.jpg",
         },
         # Books
@@ -108,7 +116,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("39.99"),
             "category_id": 3,
             "stock_quantity": 75,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/python-book.jpg",
         },
         {
@@ -117,7 +125,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("44.99"),
             "category_id": 3,
             "stock_quantity": 60,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/webdev-book.jpg",
         },
         # Home & Garden
@@ -127,7 +135,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("29.99"),
             "category_id": 4,
             "stock_quantity": 80,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/plant-pots.jpg",
         },
         {
@@ -136,7 +144,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("34.99"),
             "category_id": 4,
             "stock_quantity": 90,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/desk-lamp.jpg",
         },
         # Sports
@@ -146,7 +154,7 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("24.99"),
             "category_id": 5,
             "stock_quantity": 120,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/yoga-mat.jpg",
         },
         {
@@ -155,17 +163,24 @@ async def seed_products(db: AsyncSession):
             "price": Decimal("19.99"),
             "category_id": 5,
             "stock_quantity": 110,
-            "is_active": 1,
+            "is_active": True,
             "image_url": "/static/images/resistance-bands.jpg",
         },
     ]
 
+    created = 0
     for prod_data in products_data:
-        product = Product(**prod_data)
-        db.add(product)
+        result = await db.execute(
+            select(Product).where(Product.name == prod_data["name"])
+        )
+        existing = result.scalar_one_or_none()
+        if not existing:
+            product = Product(**prod_data)
+            db.add(product)
+            created += 1
 
     await db.commit()
-    print(f"✓ Created {len(products_data)} products")
+    print(f"✓ Products: {created} created, {len(products_data) - created} skipped")
 
 
 async def main():

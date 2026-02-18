@@ -46,13 +46,13 @@ class ProductRepository:
                 )
 
             if filters.is_active is not None:
-                query = query.where(Product.is_active == (1 if filters.is_active else 0))
+                query = query.where(Product.is_active == filters.is_active)
 
             if filters.in_stock:
                 query = query.where(Product.stock_quantity > 0)
         else:
             # Default: show only active products
-            query = query.where(Product.is_active == 1)
+            query = query.where(Product.is_active == True)
 
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
@@ -94,8 +94,7 @@ class ProductRepository:
             return None
 
         for key, value in product_data.items():
-            if value is not None:
-                setattr(product, key, value)
+            setattr(product, key, value)
 
         await self.db.commit()
         await self.db.refresh(product)
@@ -107,7 +106,7 @@ class ProductRepository:
         if not product:
             return False
 
-        product.is_active = 0
+        product.is_active = False
         await self.db.commit()
         return True
 
